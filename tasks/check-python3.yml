@@ -1,0 +1,9 @@
+---
+
+# Check if Python2 is installed
+- name: Check if Python3 is installed on the server
+  raw: dpkg -s python3
+  register: python_check_is_installed
+  failed_when: python_check_is_installed.rc not in [0,1]
+  changed_when: false
+

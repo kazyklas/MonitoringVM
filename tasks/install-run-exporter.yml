@@ -1,0 +1,11 @@
+- name: Install node exporter.
+  apt:
+    deb: http://cz.archive.ubuntu.com/ubuntu/pool/universe/p/prometheus-node-exporter/prometheus-node-exporter_0.17.0+ds-3_amd64.deb
+    autoremove: yes
+    autoclean: yes
+
+- name: Enable prometheus-node-exporter on host.
+  systemd:
+    name: prometheus-node-exporter
+    state: started
+    enabled: yes

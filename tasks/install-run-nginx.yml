@@ -1,0 +1,72 @@
+- name: Install docker-py
+  raw: apt install python3-pip docker.io -y && pip3 install docker-py
+
+- name: Create NGINX directory for configuration
+  file:
+    path: /opt/nginx/etc/nginx/sites
+    state: directory
+    recurse: yes
+    owner: root
+    group: root
+
+- name: Create NGINX directory for certs
+  file:
+    path: /opt/nginx/etc/nginx/certs
+    state: directory
+    recurse: yes
+    owner: root
+    group: root
+
+- name: Copy NGINX configuration
+  copy:
+    src: config/sites
+    dest: /opt/nginx/etc/nginx/
+    owner: root
+    group: root
+    mode: 0644
+  notify: Restart NGINX
+
+- name: Deploy NGINX proxy
+  docker_container:
+    name: nginx
+    hostname: nginx
+    image: fialakarel/nginx
+    pull: yes
+    state: started
+    restart_policy: always
+#    log_options:
+#      max-size: 10m
+#    memory: 512m
+    published_ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+      - "/etc/machine_id:/etc/machine_id:ro"
+      - "/opt/nginx/etc/nginx/sites:/etc/nginx/sites:ro"
+      - "/opt/nginx/etc/nginx/certs:/etc/nginx/certs:rw"
+      - "/opt/nginx/var/www:/var/www:ro"
+
+- name: Copy generate-nginx-certs.sh
+  copy:
+    src: config/generate-nginx-certs.sh
+    dest: /opt/generate-nginx-certs.sh
+    owner: root
+    group: root
+    mode: 0750
+
+- name: Generate certs on the VM
+  shell: sh /opt/generate-nginx-certs.sh
+
+- name: Set CRON entry for generate-nginx-certs.sh
+  cron:
+    name: "generate-nginx-certs"
+    state: present
+    user: "root"
+    minute: "0"
+    hour: "1"
+    day: "1"
+    weekday: "*"
+    month: "*"
+    job: "/opt/generate-nginx-certs.sh"
+

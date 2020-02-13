@@ -1,0 +1,33 @@
+
+- name: Download and unarchive 
+  unarchive:
+    src: https://github.com/prometheus/prometheus/releases/download/v2.15.0/prometheus-2.15.0.linux-amd64.tar.gz
+    dest: /opt/
+    remote_src: yes
+ 
+- name: Copy config file to /etc/prometheus.yml
+  copy:
+    src: config/prometheus.yml
+    dest: /etc/prometheus/
+    owner: root
+    group: root
+    mode: '0750'
+
+- name: Copy systemd unit to start prometheus after restart
+  copy:
+    src: config/prometheus.service
+    dest: /lib/systemd/system/
+    owner: root
+    group: root
+    mode: '0750'
+ 
+- name: Reload systemd daemon
+  systemd:
+      daemon_reload: yes
+
+- name: Enable prometheus and run it on host.
+  systemd:
+    name: prometheus
+    state: started
+    enabled: yes
+

@@ -1,0 +1,13 @@
+[Unit]
+Description=Prometheus
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/opt/prometheus-2.2.1.linux-amd64/prometheus \
+    --config.file /etc/prometheus/prometheus.yml \
+
+[Install]
+WantedBy=multi-user.target
+

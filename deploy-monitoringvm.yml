@@ -1,0 +1,39 @@
+---
+
+- hosts: monitoringvm 
+
+  gather_facts: false
+
+  vars_files:
+    - vars/vars.yml
+    - vars/encrypted_vars.yml
+
+  tasks:
+
+    - name: Gather required facts facts
+      setup:
+ 
+    - include: tasks/check-python3.yml
+
+    - include: tasks/install-run-prometheus.yml    
+
+    - include: tasks/install-run-grafana.yml
+
+    - include: tasks/install-run-nginx.yml
+
+- hosts: monitoredvm
+
+  gather_facts: false
+
+  vars_files:
+    - vars/vars.yml
+    - vars/encrypted_vars.yml
+
+  tasks:
+
+    - name: Gather required facts facts
+      setup:
+ 
+    - include: tasks/check-python3.yml
+
+    - include: tasks/install-run-exporter.yml    
